@@ -1,5 +1,6 @@
 #include <iostream>
 #include <catch2/catch_test_macros.hpp>
+#include <iris/graphgen.hpp>
 #include <iris/lex.hpp>
 #include <iris/parse.hpp>
 
@@ -110,6 +111,65 @@ TEST_CASE("parse", "[parse]") {
       for (const auto& expr2 : expr->args) {
         CHECK(expr2.name.compare("Const") == 0);
         CHECK(expr2.args.empty());
+      }
+    }
+  }
+}
+
+TEST_CASE("graphgen", "[graphgen]") {
+  {
+    std::string_view in = "Const()";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    if (auto expr = std::get_if<ns::Expr>(&result)) {
+      auto result2 = ns::GraphGen().gen(std::move(*expr));
+      auto graph = std::get_if<ns::Graph>(&result2);
+      CHECK(graph);
+      if (graph) {
+        std::cout << *graph << std::endl;
+        CHECK(graph->nodes().size() == 1);
+
+        const auto& node = graph->nodes()[0];
+        CHECK(node->inputs().size() == 0);
+        CHECK(node->outputs().size() == 0);
+        CHECK(node.use_count() == 1);
+      }
+    }
+  }
+  {
+    std::string_view in = "Add(Const(), Const())";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    if (auto expr = std::get_if<ns::Expr>(&result)) {
+      auto result2 = ns::GraphGen().gen(std::move(*expr));
+      auto graph = std::get_if<ns::Graph>(&result2);
+      CHECK(graph);
+      if (graph) {
+        std::cout << *graph << std::endl;
+        CHECK(graph->nodes().size() == 3);
+
+        {
+          const auto& node = graph->nodes()[0];
+          const auto& value = node->outputs()[0];
+          CHECK(node->inputs().size() == 0);
+          CHECK(node->outputs().size() == 1);
+          CHECK(node.use_count() == 1);
+          CHECK(value.use_count() == 2);
+        }
+        {
+          const auto& node = graph->nodes()[1];
+          const auto& value = node->outputs()[0];
+          CHECK(node->inputs().size() == 0);
+          CHECK(node->outputs().size() == 1);
+          CHECK(node.use_count() == 1);
+          CHECK(value.use_count() == 2);
+        }
+        {
+          const auto& node = graph->nodes()[2];
+          CHECK(node->inputs().size() == 2);
+          CHECK(node->outputs().size() == 0);
+          CHECK(node.use_count() == 1);
+        }
       }
     }
   }
