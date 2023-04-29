@@ -2,7 +2,6 @@
 #pragma once
 #include <algorithm>
 #include <cctype>
-#include <variant>
 #include "fundamental.hpp" // Error
 
 namespace ns {
@@ -30,8 +29,6 @@ namespace ns {
   };
 
   std::pair<Token, std::string_view> lex(std::string_view input) {
-    using namespace std::string_view_literals;
-
     if (input.empty()) {
       return {Token(Eof{}), input};
     }
@@ -46,14 +43,15 @@ namespace ns {
       auto it = std::find_if_not(input.begin(), input.end(), isalpha);
       auto pos = static_cast<std::size_t>(it - input.begin());
       std::string data(input.substr(0, pos));
-      return {Token(Ident{data}), input.substr(pos)};
+      return {Token(Ident{std::move(data)}), input.substr(pos)};
     }
 
     if (ispunct(input.front())) {
       return {Token(Punct{input.substr(0, 1)}), input.substr(1)};
     }
 
-    return {Token(Error{"Unexpected character"sv}), input};
+    using namespace std::string_view_literals;
+    return {Token(Error{"unexpected character"sv}), input};
   }
 
   struct Lexer {
@@ -70,16 +68,16 @@ namespace ns {
 
     explicit Lexer(std::string_view input) {
       auto [token, output] = lex(input);
-      input_ = output;
-      token_ = token;
+      input_ = std::move(output);
+      token_ = std::move(token);
     }
 
     value_type operator*() const { return token_; }
 
     Lexer& operator++() {
       auto [token, output] = lex(input_);
-      input_ = output;
-      token_ = token;
+      input_ = std::move(output);
+      token_ = std::move(token);
       return *this;
     }
 
