@@ -56,7 +56,7 @@ namespace ns {
     if (isalpha(input.front())) {
       auto it = std::find_if_not(input.begin(), input.end(), isalpha);
       auto pos = static_cast<std::size_t>(it - input.begin());
-      auto data = std::string(input.substr(0, pos));
+      std::string data(input.substr(0, pos));
       return {Token(Ident{data}), input.substr(pos)};
     }
 
