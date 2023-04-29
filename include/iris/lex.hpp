@@ -18,13 +18,13 @@ namespace ns {
   };
   using Token = std::variant<Ident, Punct, Eof, Error>;
 
-  inline constexpr auto isspace = [](char c) {
+  inline constexpr auto isspace = [](char c) -> bool {
     return std::isspace(static_cast<unsigned char>(c));
   };
-  inline constexpr auto isalpha = [](char c) {
+  inline constexpr auto isalpha = [](char c) -> bool {
     return std::isalpha(static_cast<unsigned char>(c));
   };
-  inline constexpr auto ispunct = [](char c) {
+  inline constexpr auto ispunct = [](char c) -> bool {
     return std::ispunct(static_cast<unsigned char>(c));
   };
 
