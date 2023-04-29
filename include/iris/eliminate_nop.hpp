@@ -21,7 +21,7 @@ namespace ns {
       bool is_nop = (*it)->name() == "NOP"sv and (*it)->inputs().size() == 1
                     and (*it)->outputs().size() == 1;
       if (is_nop) {
-        std::weak_ptr<Node> node = *it;
+        [[maybe_unused]] std::weak_ptr<Node> node = *it;
         run_on_node_impl(*it);
 
         // graph_ から node を削除
@@ -35,7 +35,7 @@ namespace ns {
 
     void run_on_node_impl(std::shared_ptr<Node> node) const {
       // ... -> prev_node -(value)-> node[nop] -(value2)-> next_node -> ...
-      std::weak_ptr<Value> value = node->inputs()[0];
+      [[maybe_unused]] std::weak_ptr<Value> value = node->inputs()[0];
       std::shared_ptr<Node> prev_node = node->inputs()[0]->source();
 
       // prev_node.output[0] 削除
