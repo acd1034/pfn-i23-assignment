@@ -52,11 +52,19 @@ namespace ns {
 
   class Graph {
   public:
+    using insert_point_t = std::vector<std::shared_ptr<Node>>::const_iterator;
+
     Graph() = default;
 
     const std::vector<std::shared_ptr<Node>>& nodes() const { return nodes_; }
 
-    friend class GraphBuilder;
+    std::size_t use_count() { return count_++; }
+
+    insert_point_t insert_node(insert_point_t pos, std::shared_ptr<Node> node) {
+      return nodes_.insert(pos, std::move(node));
+    }
+
+    insert_point_t erase_node(insert_point_t pos) { return nodes_.erase(pos); }
 
   private:
     std::vector<std::shared_ptr<Node>> nodes_{};
@@ -88,23 +96,24 @@ namespace ns {
   class GraphBuilder {
   private:
     Graph graph_{};
-    using insert_point_t = decltype(graph_.nodes_.cend());
-    insert_point_t insert_point_ = graph_.nodes_.cend();
+    Graph::insert_point_t insert_point_ = graph_.nodes().end();
 
   public:
     GraphBuilder() = default;
     explicit GraphBuilder(Graph graph)
-      : graph_(std::move(graph)), insert_point_(graph_.nodes_.cend()) {}
+      : graph_(std::move(graph)), insert_point_(graph_.nodes().end()) {}
 
     const Graph& graph() const& { return graph_; }
     Graph graph() && { return std::move(graph_); }
+    Graph::insert_point_t insert_point() const { return insert_point_; }
 
-    void set_insert_point(insert_point_t pos) { insert_point_ = pos; }
+    void set_insert_point(Graph::insert_point_t pos) { insert_point_ = pos; }
 
     std::shared_ptr<Node> build_node(std::string name,
                                      std::vector<std::shared_ptr<Node>> args) {
       // ... -> prev_node -(value)-> next_node
-      auto next_node = std::make_shared<Node>(graph_.count_++, std::move(name));
+      auto next_node =
+        std::make_shared<Node>(graph_.use_count(), std::move(name));
       for (auto&& prev_node : args) {
         // value.source, value.target 確定
         auto value = std::make_shared<Value>(prev_node, next_node);
@@ -113,7 +122,7 @@ namespace ns {
         // next_node.input 確定
         next_node->append_input(value);
       }
-      insert_point_ = graph_.nodes_.insert(insert_point_, next_node);
+      insert_point_ = graph_.insert_node(insert_point_, next_node);
       ++insert_point_;
       return next_node;
     }
