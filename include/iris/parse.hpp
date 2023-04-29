@@ -1,7 +1,6 @@
 /// @file parse.hpp
 #pragma once
 #include <optional>
-#include <vector>
 #include "fundamental.hpp" // Error
 #include "lex.hpp"         // Token
 

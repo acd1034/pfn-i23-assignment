@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #define NS_RESULT_AUTO_IMPL(v, r)                                              \
   auto&& ns_tmp_##v = (r);                                                     \
