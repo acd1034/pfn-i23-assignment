@@ -36,6 +36,9 @@ namespace ns {
   inline constexpr auto isalpha = [](char c) {
     return std::isalpha(static_cast<unsigned char>(c));
   };
+  inline constexpr auto ispunct = [](char c) {
+    return std::ispunct(static_cast<unsigned char>(c));
+  };
 
   std::pair<Token, std::string_view> lex(std::string_view input) {
     using namespace std::string_view_literals;
@@ -55,6 +58,10 @@ namespace ns {
       auto pos = static_cast<std::size_t>(it - input.begin());
       auto data = std::string(input.substr(0, pos));
       return {Token(Ident{data}), input.substr(pos)};
+    }
+
+    if (ispunct(input.front())) {
+      return {Token(Punct{input.substr(0, 1)}), input.substr(1)};
     }
 
     return {Token(Error{"Unexpected character"sv}), input};

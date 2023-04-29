@@ -3,10 +3,10 @@
 
 TEST_CASE("lexer", "[lexer]") {
   {
-    std::string_view in = "$";
+    std::string_view in = "\1";
     auto [token, out] = ns::lex(in);
     CHECK(std::get_if<ns::Error>(&token));
-    CHECK(out.compare("$") == 0);
+    CHECK(out.compare("\1") == 0);
   }
   {
     std::string_view in = "";
@@ -27,5 +27,21 @@ TEST_CASE("lexer", "[lexer]") {
     CHECK(ident);
     CHECK(ident->data.compare("ident") == 0);
     CHECK(out.compare("") == 0);
+  }
+  {
+    std::string_view in = ",";
+    auto [token, out] = ns::lex(in);
+    auto punct = std::get_if<ns::Punct>(&token);
+    CHECK(punct);
+    CHECK(punct->data.compare(",") == 0);
+    CHECK(out.compare("") == 0);
+  }
+  {
+    std::string_view in = "()";
+    auto [token, out] = ns::lex(in);
+    auto punct = std::get_if<ns::Punct>(&token);
+    CHECK(punct);
+    CHECK(punct->data.compare("(") == 0);
+    CHECK(out.compare(")") == 0);
   }
 }
