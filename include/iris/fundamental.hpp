@@ -6,6 +6,7 @@
 // #include <initializer_list>
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <concepts>
 #include <string>
 #include <string_view>
@@ -29,11 +30,21 @@ namespace ns {
   };
   using Token = std::variant<Ident, Punct, Eof, Error>;
 
+  inline constexpr auto isspace = [](char c) {
+    return std::isspace(static_cast<unsigned char>(c));
+  };
+
   std::pair<Token, std::string_view> lex(std::string_view input) {
     using namespace std::string_view_literals;
 
     if (input.empty()) {
       return {Token(Eof{}), input};
+    }
+
+    if (isspace(input.front())) {
+      auto it = std::find_if_not(input.begin(), input.end(), isspace);
+      auto pos = static_cast<std::size_t>(it - input.begin());
+      return lex(input.substr(pos));
     }
 
     return {Token(Error{"Unexpected character"sv}), input};
