@@ -1,7 +1,9 @@
+#include <iostream>
 #include <catch2/catch_test_macros.hpp>
 #include <iris/lex.hpp>
+#include <iris/parse.hpp>
 
-TEST_CASE("lexer", "[lexer]") {
+TEST_CASE("lex", "[lex]") {
   {
     std::string_view in = "\1";
     auto [token, out] = ns::lex(in);
@@ -80,6 +82,35 @@ TEST_CASE("lexer", "[lexer]") {
       auto token = *it++;
       auto eof = std::get_if<ns::Eof>(&token);
       CHECK(eof);
+    }
+  }
+}
+
+TEST_CASE("parse", "[parse]") {
+  {
+    std::string_view in = "Const()";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    auto expr = std::get_if<ns::Expr>(&result);
+    CHECK(expr);
+    if (expr) {
+      CHECK(expr->name.compare("Const") == 0);
+      CHECK(expr->args.empty());
+    }
+  }
+  {
+    std::string_view in = "Add(Const(), Const())";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    auto expr = std::get_if<ns::Expr>(&result);
+    CHECK(expr);
+    if (expr) {
+      CHECK(expr->name.compare("Add") == 0);
+      CHECK(expr->args.size() == 2);
+      for (const auto& expr2 : expr->args) {
+        CHECK(expr2.name.compare("Const") == 0);
+        CHECK(expr2.args.empty());
+      }
     }
   }
 }
