@@ -44,4 +44,37 @@ TEST_CASE("lexer", "[lexer]") {
     CHECK(punct->data.compare("(") == 0);
     CHECK(out.compare(")") == 0);
   }
+  {
+    std::string_view in = "Neg(input)";
+    ns::Lexer it(in);
+    {
+      auto token = *it++;
+      auto ident = std::get_if<ns::Ident>(&token);
+      CHECK(ident);
+      CHECK(ident->data.compare("Neg") == 0);
+    }
+    {
+      auto token = *it++;
+      auto punct = std::get_if<ns::Punct>(&token);
+      CHECK(punct);
+      CHECK(punct->data.compare("(") == 0);
+    }
+    {
+      auto token = *it++;
+      auto ident = std::get_if<ns::Ident>(&token);
+      CHECK(ident);
+      CHECK(ident->data.compare("input") == 0);
+    }
+    {
+      auto token = *it++;
+      auto punct = std::get_if<ns::Punct>(&token);
+      CHECK(punct);
+      CHECK(punct->data.compare(")") == 0);
+    }
+    {
+      auto token = *it++;
+      auto eof = std::get_if<ns::Eof>(&token);
+      CHECK(eof);
+    }
+  }
 }

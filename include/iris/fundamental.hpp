@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cctype>
 #include <concepts>
+#include <iterator>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -20,13 +21,18 @@ namespace ns {
 
   struct Ident {
     std::string data;
+    friend bool operator==(const Ident&, const Ident&) = default;
   };
   struct Punct {
     std::string_view data;
+    friend bool operator==(const Punct&, const Punct&) = default;
   };
-  struct Eof {};
+  struct Eof {
+    friend bool operator==(const Eof&, const Eof&) = default;
+  };
   struct Error {
     std::string_view msg;
+    friend bool operator==(const Error&, const Error&) = default;
   };
   using Token = std::variant<Ident, Punct, Eof, Error>;
 
@@ -66,4 +72,42 @@ namespace ns {
 
     return {Token(Error{"Unexpected character"sv}), input};
   }
+
+  struct Lexer {
+  private:
+    std::string_view input_{};
+    Token token_{};
+
+  public:
+    using difference_type = std::ptrdiff_t;
+    using value_type = Token;
+    using iterator_concept = std::forward_iterator_tag;
+
+    Lexer() = default;
+
+    explicit Lexer(std::string_view input) {
+      auto [token, output] = lex(input);
+      input_ = output;
+      token_ = token;
+    }
+
+    value_type operator*() const { return token_; }
+
+    Lexer& operator++() {
+      auto [token, output] = lex(input_);
+      input_ = output;
+      token_ = token;
+      return *this;
+    }
+
+    Lexer operator++(int) {
+      Lexer tmp = *this;
+      ++*this;
+      return tmp;
+    }
+
+    friend bool operator==(const Lexer&, const Lexer&) = default;
+  };
+
+  static_assert(std::forward_iterator<Lexer>);
 } // namespace ns
