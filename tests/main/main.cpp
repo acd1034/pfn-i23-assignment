@@ -20,4 +20,12 @@ TEST_CASE("lexer", "[lexer]") {
     CHECK(std::get_if<ns::Eof>(&token));
     CHECK(out.compare("") == 0);
   }
+  {
+    std::string_view in = "ident";
+    auto [token, out] = ns::lex(in);
+    auto ident = std::get_if<ns::Ident>(&token);
+    CHECK(ident);
+    CHECK(ident->data.compare("ident") == 0);
+    CHECK(out.compare("") == 0);
+  }
 }
