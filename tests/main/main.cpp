@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include <iris/fundamental.hpp>
+#include <iris/lex.hpp>
 
 TEST_CASE("lexer", "[lexer]") {
   {

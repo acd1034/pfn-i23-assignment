@@ -1,9 +1,5 @@
-/// @file fundamental.hpp
+/// @file lex.hpp
 #pragma once
-// #include <compare>
-// #include <cstddef> // std::size_t, std::ptrdiff_t, std::nullptr_t
-// #include <cstdint> // std::int32_t
-// #include <initializer_list>
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -17,8 +13,6 @@
 #include <variant>
 
 namespace ns {
-  // ----- lexer -----
-
   struct Ident {
     std::string data;
     friend bool operator==(const Ident&, const Ident&) = default;
