@@ -1,16 +1,9 @@
 /// @file lex.hpp
 #pragma once
 #include <algorithm>
-#include <cassert>
 #include <cctype>
-#include <concepts>
-#include <iterator>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <utility>
 #include <variant>
+#include "fundamental.hpp" // Error
 
 namespace ns {
   struct Ident {
@@ -23,10 +16,6 @@ namespace ns {
   };
   struct Eof {
     friend bool operator==(const Eof&, const Eof&) = default;
-  };
-  struct Error {
-    std::string_view msg;
-    friend bool operator==(const Error&, const Error&) = default;
   };
   using Token = std::variant<Ident, Punct, Eof, Error>;
 
