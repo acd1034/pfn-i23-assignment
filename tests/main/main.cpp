@@ -76,5 +76,10 @@ TEST_CASE("lexer", "[lexer]") {
       auto eof = std::get_if<ns::Eof>(&token);
       CHECK(eof);
     }
+    {
+      auto token = *it++;
+      auto eof = std::get_if<ns::Eof>(&token);
+      CHECK(eof);
+    }
   }
 }
