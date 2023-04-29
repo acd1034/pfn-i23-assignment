@@ -29,6 +29,9 @@ namespace ns {
       outputs_.push_back(std::move(value));
     }
 
+    void clear_input() { inputs_.clear(); }
+    void clear_output() { outputs_.clear(); }
+
   private:
     std::size_t id_{};
     std::string name_{};
@@ -44,6 +47,9 @@ namespace ns {
 
     std::shared_ptr<Node> source() const { return source_.lock(); }
     std::shared_ptr<Node> target() const { return target_.lock(); }
+
+    void set_source(std::shared_ptr<Node> node) { source_ = std::move(node); }
+    void set_target(std::shared_ptr<Node> node) { target_ = std::move(node); }
 
   private:
     std::weak_ptr<Node> source_{};
@@ -64,7 +70,10 @@ namespace ns {
       return nodes_.insert(pos, std::move(node));
     }
 
-    insert_point_t erase_node(insert_point_t pos) { return nodes_.erase(pos); }
+    insert_point_t erase_node(insert_point_t pos) {
+      assert((*pos)->inputs().size() == 0 and (*pos)->outputs().size() == 0);
+      return nodes_.erase(pos);
+    }
 
   private:
     std::vector<std::shared_ptr<Node>> nodes_{};
@@ -72,11 +81,12 @@ namespace ns {
   };
 
   template <class CharT, class Traits>
-  void print_node(std::basic_ostream<CharT, Traits>& os, const Node& node) {
-    os << "%" << node.id() << " = " << node.name() << "(";
+  void print_node(std::basic_ostream<CharT, Traits>& os,
+                  std::shared_ptr<Node> node) {
+    os << "%" << node->id() << " = " << node->name() << "(";
     const char* dlm = "";
-    for (const auto& value : node.inputs()) {
-      const auto& source = value->source();
+    for (std::shared_ptr<Value> value : node->inputs()) {
+      std::shared_ptr<Node> source = value->source();
       os << std::exchange(dlm, ", ") << "%" << source->id();
     }
     os << ")";
@@ -86,9 +96,9 @@ namespace ns {
   std::basic_ostream<CharT, Traits>&
   operator<<(std::basic_ostream<CharT, Traits>& os, const Graph& graph) {
     const char* dlm = "";
-    for (const auto& node : graph.nodes()) {
+    for (std::shared_ptr<Node> node : graph.nodes()) {
       os << std::exchange(dlm, "\n");
-      print_node(os, *node);
+      print_node(os, node);
     }
     return os;
   }
