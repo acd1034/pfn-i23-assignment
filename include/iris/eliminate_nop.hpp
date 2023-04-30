@@ -1,6 +1,5 @@
 /// @file eliminate_nop.hpp
 #pragma once
-#include "fundamental.hpp" // Error
 #include "graph.hpp"
 
 namespace ns {
@@ -20,16 +19,17 @@ namespace ns {
       using namespace std::string_view_literals;
       bool is_nop = (*it)->name() == "NOP"sv and (*it)->inputs().size() == 1
                     and (*it)->outputs().size() == 1;
-      if (is_nop) {
-        [[maybe_unused]] std::weak_ptr<Node> node = *it;
-        run_on_node_impl(*it);
 
-        // graph_ から node を削除
-        it = graph_.erase_node(it);
-        assert(node.expired());
-      } else {
+      if (not is_nop) {
         ++it;
+        return it;
       }
+
+      [[maybe_unused]] std::weak_ptr<Node> node = *it;
+      run_on_node_impl(*it);
+      // graph_ から node を削除
+      it = graph_.erase_node(it);
+      assert(node.expired());
       return it;
     }
 

@@ -1,6 +1,6 @@
 /// @file lex.hpp
 #pragma once
-#include <algorithm>
+#include <algorithm> // std::find_if_not
 #include <cctype>
 #include "fundamental.hpp" // Error
 
