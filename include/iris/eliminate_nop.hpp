@@ -28,7 +28,7 @@ namespace ns {
       [[maybe_unused]] std::weak_ptr<Node> nop = *it;
       disconnect_and_relink_values(*it);
       // graph_ から nop を削除
-      it = graph_.erase_node(it);
+      it = graph_.erase_node(std::move(it));
       assert(nop.expired());
       return it;
     }

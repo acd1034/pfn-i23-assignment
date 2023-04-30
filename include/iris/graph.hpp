@@ -132,7 +132,7 @@ namespace ns {
         // next_node.input 確定
         next_node->append_input(value);
       }
-      insert_point_ = graph_.insert_node(insert_point_, next_node);
+      insert_point_ = graph_.insert_node(std::move(insert_point_), next_node);
       ++insert_point_;
       return next_node;
     }
