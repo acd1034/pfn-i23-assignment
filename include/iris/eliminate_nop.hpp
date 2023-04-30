@@ -26,14 +26,15 @@ namespace ns {
       }
 
       [[maybe_unused]] std::weak_ptr<Node> node = *it;
-      run_on_node_impl(*it);
+      disconnect_and_relink_values(*it);
       // graph_ から node を削除
       it = graph_.erase_node(it);
       assert(node.expired());
       return it;
     }
 
-    void run_on_node_impl(std::shared_ptr<Node> node) const {
+  private:
+    void disconnect_and_relink_values(std::shared_ptr<Node> node) const {
       // ... -> prev_node -(value)-> node[nop] -(value2)-> next_node -> ...
       [[maybe_unused]] std::weak_ptr<Value> value = node->inputs()[0];
       std::shared_ptr<Node> prev_node = node->inputs()[0]->source();
@@ -57,7 +58,6 @@ namespace ns {
       // ... -> prev_node -(value2)-> next_node -> ...
     }
 
-  private:
     Graph graph_{};
   };
 } // namespace ns
