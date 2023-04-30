@@ -1,7 +1,7 @@
 /// @file graph.hpp
 #pragma once
 #include <iosfwd>
-#include "fundamental.hpp" // Error
+#include "fundamental.hpp"
 
 namespace ns {
   class Value;
@@ -130,9 +130,11 @@ namespace ns {
         // prev_node.output 確定
         prev_node->append_output(value);
         // next_node.input 確定
-        next_node->append_input(value);
+        next_node->append_input(std::move(value));
+        assert(next_node->inputs().back().use_count() == 2);
       }
       insert_point_ = graph_.insert_node(std::move(insert_point_), next_node);
+      assert(next_node.use_count() == 2);
       ++insert_point_;
       return next_node;
     }

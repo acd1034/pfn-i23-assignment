@@ -49,10 +49,10 @@ namespace ns {
       nop->clear_output();
 
       std::shared_ptr<Value> value2 = nop->outputs()[0];
-      // value2.source 更新
-      value2->set_source(prev_node);
       // prev_node.output 追加
       prev_node->append_output(value2);
+      // value2.source 更新
+      value2->set_source(prev_node);
 
       // この時点のグラフ:
       // ... -> prev_node -(value2)-> next_node -> ...
