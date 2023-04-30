@@ -87,11 +87,11 @@ namespace ns {
       return args;
     }
 
-    NS_RESULT_AUTO(expr, parse_expr(it));
+    NS_RESULT_TRY(expr, parse_expr(it));
     args.push_back(std::move(expr));
     while (not consume_punct(it, ")")) {
-      NS_RESULT_AUTO(_p, expect_punct(it, ","));
-      NS_RESULT_AUTO(expr2, parse_expr(it));
+      NS_RESULT_TRY(_p, expect_punct(it, ","));
+      NS_RESULT_TRY(expr2, parse_expr(it));
       args.push_back(std::move(expr2));
     }
 
@@ -100,9 +100,9 @@ namespace ns {
 
   // primary  = ident "(" fun_args
   std::variant<Expr, Error> parse_primary(Lexer& it) {
-    NS_RESULT_AUTO(name, expect_ident(it));
-    NS_RESULT_AUTO(_p, expect_punct(it, "("));
-    NS_RESULT_AUTO(args, parse_fun_args(it));
+    NS_RESULT_TRY(name, expect_ident(it));
+    NS_RESULT_TRY(_p, expect_punct(it, "("));
+    NS_RESULT_TRY(args, parse_fun_args(it));
     return Expr{std::move(name.data), std::move(args)};
   }
 

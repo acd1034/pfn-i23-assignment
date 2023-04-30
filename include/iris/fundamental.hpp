@@ -15,14 +15,14 @@
 #include <variant>
 #include <vector>
 
-#define NS_RESULT_AUTO_IMPL(v, r)                                              \
-  auto&& ns_tmp_##v = (r);                                                     \
-  if (ns_tmp_##v.index() == 1)                                                 \
-    return std::get<1>(std::forward<decltype(ns_tmp_##v)>(ns_tmp_##v));        \
-  [[maybe_unused]] auto&& v =                                                  \
-    std::get<0>(std::forward<decltype(ns_tmp_##v)>(ns_tmp_##v))
+#define NS_RESULT_TRY_IMPL(var, result)                                        \
+  auto&& ns_tmp_##var = (result);                                              \
+  if (ns_tmp_##var.index() == 1)                                               \
+    return std::get<1>(std::forward<decltype(ns_tmp_##var)>(ns_tmp_##var));    \
+  [[maybe_unused]] auto&& var =                                                \
+    std::get<0>(std::forward<decltype(ns_tmp_##var)>(ns_tmp_##var))
 
-#define NS_RESULT_AUTO(v, r) NS_RESULT_AUTO_IMPL(v, r)
+#define NS_RESULT_TRY(var, result) NS_RESULT_TRY_IMPL(var, result)
 
 namespace ns {
   struct Error {

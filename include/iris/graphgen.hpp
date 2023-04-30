@@ -9,7 +9,7 @@ namespace ns {
     GraphGen() = default;
 
     std::variant<Graph, Error> gen(Expr expr) && {
-      NS_RESULT_AUTO(_n, gen_expr(std::move(expr)));
+      NS_RESULT_TRY(_n, gen_expr(std::move(expr)));
       return std::move(builder_).graph();
     }
 
@@ -20,7 +20,7 @@ namespace ns {
     std::variant<std::shared_ptr<Node>, Error> gen_call(Expr expr) {
       std::vector<std::shared_ptr<Node>> nodes{};
       for (auto&& arg : expr.args) {
-        NS_RESULT_AUTO(node, gen_expr(std::move(arg)));
+        NS_RESULT_TRY(node, gen_expr(std::move(arg)));
         nodes.push_back(std::move(node));
       }
       return builder_.build_node(std::move(expr.name), std::move(nodes));
