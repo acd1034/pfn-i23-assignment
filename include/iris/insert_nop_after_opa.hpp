@@ -25,43 +25,23 @@ namespace ns {
       }
 
       auto nop = std::make_shared<Node>(graph_.unique_id(), "NOP");
-      relink_and_connect(*it, nop);
-      ++it;
-      it = graph_.insert_node(std::move(it), std::move(nop));
-      assert(it->use_count() == 1);
-      ++it;
-      return it;
+      [[maybe_unused]] std::weak_ptr<Node> weak_nop = nop;
+      std::shared_ptr<Node> opa = *it;
+
+      // ... -> opa -> next_node -> ...
+      //        nop
+      relink_source_node(opa, nop);
+      // ... -> opa
+      //        nop -> next_node -> ...
+      connect_nodes(std::move(opa), nop);
+      // ... -> opa -> nop -> next_node -> ...
+      it = graph_.insert_node(std::move(it) + 1, std::move(nop));
+
+      assert(weak_nop.use_count() == 1);
+      return std::move(it) + 1;
     }
 
   private:
-    void relink_and_connect(std::shared_ptr<Node> opa,
-                            std::shared_ptr<Node> nop) const {
-      // ... -> opa -(value)-> next_node -> ...
-
-      // relink(opa, nop)
-      // opa.outputs[0].source を nop に変更する
-      assert(opa->outputs().size() == 1);
-      std::shared_ptr<Value> value = opa->outputs()[0];
-      // opa.outputs[0] 削除
-      opa->clear_output();
-      // nop.outputs 追加
-      nop->append_output(value);
-      // value.source 更新
-      value->set_source(nop);
-
-      // connect(opa, nop)
-      // new_value.source, new_value.target 確定
-      auto new_value = std::make_shared<Value>(opa, nop);
-      // opa.output 確定
-      opa->append_output(new_value);
-      // nop.input 確定
-      nop->append_input(std::move(new_value));
-      assert(nop->inputs().back().use_count() == 2);
-
-      // この時点のグラフ:
-      // ... -> opa -(new_value)-> nop -(value)-> next_node -> ...
-    }
-
     Graph graph_{};
   };
 } // namespace ns

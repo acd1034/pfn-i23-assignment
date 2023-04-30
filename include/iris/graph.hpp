@@ -5,7 +5,6 @@
 
 namespace ns {
   class Value;
-  class GraphBuilder;
 
   class Node {
   public:
@@ -56,6 +55,47 @@ namespace ns {
     std::weak_ptr<Node> target_{};
   };
 
+  void connect_nodes(std::shared_ptr<Node> from, std::shared_ptr<Node> to) {
+    // new_value.source, new_value.target 確定
+    auto new_value = std::make_shared<Value>(from, to);
+    // from.outputs 追加
+    from->append_output(new_value);
+    // to.inputs 追加
+    to->append_input(std::move(new_value));
+
+    assert(to->inputs().back().use_count() == 2);
+  }
+
+  void disconnect_nodes(std::shared_ptr<Node> from, std::shared_ptr<Node> to) {
+    assert(from->outputs().size() == 1 and to->inputs().size() == 1);
+    [[maybe_unused]] std::weak_ptr<Value> value = to->inputs()[0];
+    assert(value.use_count() == 2);
+
+    // from.outputs[0] 削除
+    from->clear_output();
+    // to.inputs[0] 削除
+    to->clear_input();
+
+    assert(value.expired());
+  }
+
+  /// from.outputs[0].source を to に変更する
+  void relink_source_node(std::shared_ptr<Node> from,
+                          std::shared_ptr<Node> to) {
+    assert(from->outputs().size() == 1);
+    std::shared_ptr<Value> value = from->outputs()[0];
+    [[maybe_unused]] long use_count = value.use_count();
+
+    // from.outputs[0] 削除
+    from->clear_output();
+    // to.outputs 追加
+    to->append_output(value);
+    // value.source 更新
+    value->set_source(to);
+
+    assert(value.use_count() == use_count);
+  }
+
   class Graph {
   public:
     using insert_point_t = std::vector<std::shared_ptr<Node>>::const_iterator;
@@ -98,22 +138,17 @@ namespace ns {
 
     std::shared_ptr<Node> build_node(std::string name,
                                      std::vector<std::shared_ptr<Node>> args) {
-      // ... -> prev_node -(value)-> next_node
       auto next_node =
         std::make_shared<Node>(graph_.unique_id(), std::move(name));
       for (auto&& prev_node : args) {
-        // connect(prev_node, next_node)
-        // value.source, value.target 確定
-        auto value = std::make_shared<Value>(prev_node, next_node);
-        // prev_node.output 確定
-        prev_node->append_output(value);
-        // next_node.input 確定
-        next_node->append_input(std::move(value));
-        assert(next_node->inputs().back().use_count() == 2);
+        // ... -> prev_node
+        //        next_node
+        connect_nodes(std::move(prev_node), next_node);
+        // ... -> prev_node -> next_node
       }
       insert_point_ = graph_.insert_node(std::move(insert_point_), next_node);
-      assert(next_node.use_count() == 2);
       ++insert_point_;
+      assert(next_node.use_count() == 2);
       return next_node;
     }
   };
