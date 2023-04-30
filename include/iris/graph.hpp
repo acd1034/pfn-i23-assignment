@@ -80,29 +80,6 @@ namespace ns {
     std::size_t count_{};
   };
 
-  template <class CharT, class Traits>
-  void print_node(std::basic_ostream<CharT, Traits>& os,
-                  std::shared_ptr<Node> node) {
-    os << "%" << node->id() << " = " << node->name() << "(";
-    const char* dlm = "";
-    for (std::shared_ptr<Value> value : node->inputs()) {
-      std::shared_ptr<Node> source = value->source();
-      os << std::exchange(dlm, ", ") << "%" << source->id();
-    }
-    os << ")";
-  }
-
-  template <class CharT, class Traits>
-  std::basic_ostream<CharT, Traits>&
-  operator<<(std::basic_ostream<CharT, Traits>& os, const Graph& graph) {
-    const char* dlm = "";
-    for (std::shared_ptr<Node> node : graph.nodes()) {
-      os << std::exchange(dlm, "\n");
-      print_node(os, node);
-    }
-    return os;
-  }
-
   class GraphBuilder {
   private:
     Graph graph_{};
@@ -140,4 +117,29 @@ namespace ns {
       return next_node;
     }
   };
+
+  // ----- methods -----
+
+  template <class CharT, class Traits>
+  void print_node(std::basic_ostream<CharT, Traits>& os,
+                  std::shared_ptr<Node> node) {
+    os << "%" << node->id() << " = " << node->name() << "(";
+    const char* dlm = "";
+    for (std::shared_ptr<Value> value : node->inputs()) {
+      std::shared_ptr<Node> source = value->source();
+      os << std::exchange(dlm, ", ") << "%" << source->id();
+    }
+    os << ")";
+  }
+
+  template <class CharT, class Traits>
+  std::basic_ostream<CharT, Traits>&
+  operator<<(std::basic_ostream<CharT, Traits>& os, const Graph& graph) {
+    const char* dlm = "";
+    for (std::shared_ptr<Node> node : graph.nodes()) {
+      os << std::exchange(dlm, "\n");
+      print_node(os, node);
+    }
+    return os;
+  }
 } // namespace ns
