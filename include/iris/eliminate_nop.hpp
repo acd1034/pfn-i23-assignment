@@ -6,7 +6,7 @@
 namespace ns {
   struct EliminateNop {
     EliminateNop() = default;
-    EliminateNop(Graph graph) : graph_(std::move(graph)) {}
+    explicit EliminateNop(Graph graph) : graph_(std::move(graph)) {}
 
     Graph run() && {
       auto it = graph_.nodes().begin();

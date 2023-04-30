@@ -64,7 +64,7 @@ namespace ns {
 
     const std::vector<std::shared_ptr<Node>>& nodes() const { return nodes_; }
 
-    std::size_t use_count() { return count_++; }
+    std::size_t unique_id() { return count_++; }
 
     insert_point_t insert_node(insert_point_t pos, std::shared_ptr<Node> node) {
       return nodes_.insert(pos, std::move(node));
@@ -123,7 +123,7 @@ namespace ns {
                                      std::vector<std::shared_ptr<Node>> args) {
       // ... -> prev_node -(value)-> next_node
       auto next_node =
-        std::make_shared<Node>(graph_.use_count(), std::move(name));
+        std::make_shared<Node>(graph_.unique_id(), std::move(name));
       for (auto&& prev_node : args) {
         // value.source, value.target 確定
         auto value = std::make_shared<Value>(prev_node, next_node);
