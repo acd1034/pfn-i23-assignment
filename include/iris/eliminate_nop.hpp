@@ -25,30 +25,30 @@ namespace ns {
         return it;
       }
 
-      [[maybe_unused]] std::weak_ptr<Node> node = *it;
+      [[maybe_unused]] std::weak_ptr<Node> nop = *it;
       disconnect_and_relink_values(*it);
-      // graph_ から node を削除
+      // graph_ から nop を削除
       it = graph_.erase_node(it);
-      assert(node.expired());
+      assert(nop.expired());
       return it;
     }
 
   private:
-    void disconnect_and_relink_values(std::shared_ptr<Node> node) const {
-      // ... -> prev_node -(value)-> node[nop] -(value2)-> next_node -> ...
-      [[maybe_unused]] std::weak_ptr<Value> value = node->inputs()[0];
-      std::shared_ptr<Node> prev_node = node->inputs()[0]->source();
+    void disconnect_and_relink_values(std::shared_ptr<Node> nop) const {
+      // ... -> prev_node -(value)-> nop -(value2)-> next_node -> ...
+      [[maybe_unused]] std::weak_ptr<Value> value = nop->inputs()[0];
+      std::shared_ptr<Node> prev_node = nop->inputs()[0]->source();
 
       // prev_node.output[0] 削除
       prev_node->clear_output();
-      // node.input[0] 削除
-      node->clear_input();
+      // nop.input[0] 削除
+      nop->clear_input();
       assert(value.expired());
 
-      // node.output[0] 削除
-      node->clear_output();
+      // nop.output[0] 削除
+      nop->clear_output();
 
-      std::shared_ptr<Value> value2 = node->outputs()[0];
+      std::shared_ptr<Value> value2 = nop->outputs()[0];
       // value2.source 更新
       value2->set_source(prev_node);
       // prev_node.output 追加
