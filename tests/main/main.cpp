@@ -2,6 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iris/eliminate_nop.hpp>
 #include <iris/graphgen.hpp>
+#include <iris/insert_nop_after_opa.hpp>
 #include <iris/lex.hpp>
 #include <iris/memory_leak_analyzer.hpp>
 #include <iris/parse.hpp>
@@ -198,6 +199,31 @@ TEST_CASE("eliminate_nop", "[eliminate_nop]") {
         CHECK(graph_opt.nodes()[0]->name().compare("Const") == 0);
         CHECK(graph_opt.nodes()[1]->name().compare("Const") == 0);
         CHECK(graph_opt.nodes()[2]->name().compare("Add") == 0);
+      }
+    }
+  }
+}
+
+TEST_CASE("insert_nop_after_opa", "[insert_nop_after_opa]") {
+  {
+    std::string_view in = "Add(opA(), Const())";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    if (auto expr = std::get_if<ns::Expr>(&result)) {
+      auto result2 = ns::GraphGen().gen(std::move(*expr));
+      if (auto graph = std::get_if<ns::Graph>(&result2)) {
+        std::cout << '\n' << *graph << std::endl;
+        auto graph_opt = ns::InsertNopAfterOpA(std::move(*graph)).run();
+        std::cout << '\n' << graph_opt << std::endl;
+
+        auto stat = ns::MemoryLeakAnalyzer(*graph).run();
+        CHECK(stat.pos == graph->nodes().end());
+
+        CHECK(graph_opt.nodes().size() == 4);
+        CHECK(graph_opt.nodes()[0]->name().compare("opA") == 0);
+        CHECK(graph_opt.nodes()[1]->name().compare("NOP") == 0);
+        CHECK(graph_opt.nodes()[2]->name().compare("Const") == 0);
+        CHECK(graph_opt.nodes()[3]->name().compare("Add") == 0);
       }
     }
   }
