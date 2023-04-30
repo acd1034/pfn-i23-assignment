@@ -125,6 +125,7 @@ namespace ns {
       auto next_node =
         std::make_shared<Node>(graph_.unique_id(), std::move(name));
       for (auto&& prev_node : args) {
+        // connect(prev_node, next_node)
         // value.source, value.target 確定
         auto value = std::make_shared<Value>(prev_node, next_node);
         // prev_node.output 確定
