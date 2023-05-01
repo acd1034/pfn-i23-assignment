@@ -7,6 +7,7 @@
 namespace ns {
   struct GraphGen {
     GraphGen() = default;
+    explicit GraphGen(Graph graph) : builder_(std::move(graph)) {}
 
     std::variant<Graph, Error> gen(Expr expr) && {
       NS_RESULT_TRY(_n, gen_expr(std::move(expr)));
