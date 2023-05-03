@@ -102,7 +102,7 @@ namespace ns {
 
   class Graph {
   public:
-    using insert_point_t = std::vector<std::shared_ptr<Node>>::const_iterator;
+    using node_iterator = std::vector<std::shared_ptr<Node>>::const_iterator;
 
     Graph() = default;
 
@@ -110,11 +110,11 @@ namespace ns {
 
     std::size_t unique_id() { return count_++; }
 
-    insert_point_t insert_node(insert_point_t pos, std::shared_ptr<Node> node) {
+    node_iterator insert_node(node_iterator pos, std::shared_ptr<Node> node) {
       return nodes_.insert(pos, std::move(node));
     }
 
-    insert_point_t erase_node(insert_point_t pos) {
+    node_iterator erase_node(node_iterator pos) {
       assert((*pos)->inputs().size() == 0 and (*pos)->outputs().size() == 0);
       return nodes_.erase(pos);
     }
@@ -150,7 +150,7 @@ namespace ns {
   class GraphBuilder {
   private:
     Graph graph_{};
-    Graph::insert_point_t insert_point_ = graph_.nodes().end();
+    Graph::node_iterator insert_point_ = graph_.nodes().end();
 
   public:
     GraphBuilder() = default;
@@ -159,9 +159,9 @@ namespace ns {
 
     const Graph& graph() const& { return graph_; }
     Graph graph() && { return std::move(graph_); }
-    Graph::insert_point_t insert_point() const { return insert_point_; }
+    Graph::node_iterator insert_point() const { return insert_point_; }
 
-    void set_insert_point(Graph::insert_point_t pos) { insert_point_ = pos; }
+    void set_insert_point(Graph::node_iterator pos) { insert_point_ = pos; }
 
     std::shared_ptr<Node> build_node(std::string name,
                                      std::vector<std::shared_ptr<Node>> args) {

@@ -6,7 +6,7 @@
 
 namespace ns {
   struct MemoryLeakStatistics {
-    Graph::insert_point_t pos;
+    Graph::node_iterator pos;
     long node_use_count;
     std::vector<long> outputs_use_count;
   };
@@ -25,7 +25,7 @@ namespace ns {
       return std::move(stat_);
     }
 
-    Graph::insert_point_t run_on_node(Graph::insert_point_t it) {
+    Graph::node_iterator run_on_node(Graph::node_iterator it) {
       long node_use_count = it->use_count();
       std::vector<long> outputs_use_count((*it)->outputs().size());
       std::transform(

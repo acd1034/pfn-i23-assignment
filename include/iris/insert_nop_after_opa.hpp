@@ -16,7 +16,7 @@ namespace ns {
       return std::move(graph_);
     }
 
-    Graph::insert_point_t run_on_node(Graph::insert_point_t it) {
+    Graph::node_iterator run_on_node(Graph::node_iterator it) {
       std::shared_ptr<Node> node = *it;
       using namespace std::string_view_literals;
       bool is_opa = node->name() == "opA"sv and node->outputs().size() == 1;
