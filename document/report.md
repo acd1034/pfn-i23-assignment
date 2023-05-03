@@ -18,33 +18,33 @@ class Graph:
 
 ```cpp
 function disconnect_nodes(std::shared_ptr<Value> value):
-  std::shared_ptr<Node> from_node ← valueのsource_nodeのstd::shared_ptr
-  std::shared_ptr<Node> to_node ← valueのtarget_nodeのstd::shared_ptr
-  usize i ← from_nodeのoutput_values内でのvalueの位置
-  usize j ← to_nodeのinput_values内でのvalueの位置
-  from_nodeのoutput_valuesのi番目の要素を削除
-  to_nodeのinput_valuesのj番目の要素を削除
+  std::shared_ptr<Node> from_node ← value->source_node
+  std::shared_ptr<Node> to_node ← value->target_node
+  usize i ← from_node->output_values内でのvalueの位置
+  usize j ← to_node->input_values内でのvalueの位置
+  from_node->output_valuesのi番目の要素を削除
+  to_node->input_valuesのj番目の要素を削除
   return
 
-/// valueのsource_nodeをto_nodeに変更する
+/// value->source_nodeをto_nodeに変更する
 function relink_source_node(
   std::shared_ptr<Value> value,
   std::shared_ptr<Node> to_node):
-  std::shared_ptr<Node> from_node ← valueのsource_nodeのstd::shared_ptr
+  std::shared_ptr<Node> from_node ← value->source_node
   usize i ← from_nodeのoutput_values内でのvalueの位置
-  from_nodeのoutput_valuesのi番目の要素を削除
-  to_nodeのoutput_valuesの末尾にvalueを追加
-  valueのsource_nodeにto_nodeを代入
+  from_node->output_valuesのi番目の要素を削除
+  to_node->output_valuesの末尾にvalueを追加
+  value->source_node ← to_node
   return
 ```
 
 ```cpp
 function eliminate_nop(Graph graph) -> Graph:
   usize i ← 0
-  while i != graph.nodes.length:
-    std::shared_ptr<Node> node = graph.nodes[i]
+  while i != graph.nodes.length do
+    std::shared_ptr<Node> node ← graph.nodes[i]
     bool is_nop ← node->name == "NOP" and node->input_values.length == 1 and node->output_values.length == 1
-    if (not is_nop)
+    if not is_nop then
       i ← i + 1
       continue
     //        (i-1)                (i)     (i+1)
@@ -70,24 +70,24 @@ function eliminate_nop(Graph graph) -> Graph:
 function connect_nodes(
   std::shared_ptr<Node> from_node,
   std::shared_ptr<Node> to_node):
-  std::shared_ptr<Value> value ← from_nodeをsource_node,to_nodeをtarget_nodeとするValueのstd::shared_ptr
-  from_nodeのoutput_valuesの末尾にvalueを追加
-  to_nodeのinput_valuesの末尾にvalueを追加
+  std::shared_ptr<Value> value ← from_nodeをsource_node,to_nodeをtarget_nodeとするValue
+  from_node->output_valuesの末尾にvalueを追加
+  to_node->input_valuesの末尾にvalueを追加
   return
 ```
 
 ```cpp
 function insert_nop_after_opa(Graph graph) -> Graph:
   usize i ← 0
-  while i != graph.nodes.length:
-    std::shared_ptr<Node> node = graph.nodes[i]
-    bool is_opa = node->name == "opA" and node->output_values.length == 1
-    if (not is_opa)
+  while i != graph.nodes.length do
+    std::shared_ptr<Node> node ← graph.nodes[i]
+    bool is_opa ← node->name == "opA" and node->output_values.length == 1
+    if not is_opa then
       i ← i + 1
       continue
     //        (i)     (i+1)
     // ... -> node -> next_node -> ...
-    std::shared_ptr<Node> nop ← "NOP"をnameとNodeのstd::shared_ptr
+    std::shared_ptr<Node> nop ← "NOP"をnameとするNode
     graph.nodesのi+1番目の位置にnopを挿入
     // ... -> node -(value)-> next_node -> ...
     //         nop
