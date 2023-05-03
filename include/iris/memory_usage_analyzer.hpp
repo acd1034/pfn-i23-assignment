@@ -33,7 +33,7 @@ namespace ns {
 
       for (std::size_t i = 0; i < stat_.last_uses.size(); ++i) {
         for (std::size_t j = i; j <= stat_.last_uses[i]; ++j) {
-          ++stat_.usages[j];
+          stat_.usages[j] += graph_.nodes()[j]->memory_usage();
         }
       }
       return std::move(stat_);

@@ -9,11 +9,13 @@ namespace ns {
   class Node {
   public:
     Node() = default;
-    Node(std::size_t id, std::string name)
-      : id_(std::move(id)), name_(std::move(name)) {}
+    Node(std::size_t id, std::string name, std::size_t memory_usage = 1)
+      : id_(std::move(id)), name_(std::move(name)),
+        memory_usage_(memory_usage) {}
 
     std::size_t id() const { return id_; }
     std::string_view name() const { return name_; }
+    std::size_t memory_usage() const { return memory_usage_; }
     const std::vector<std::shared_ptr<Value>>& inputs() const {
       return inputs_;
     }
@@ -34,6 +36,7 @@ namespace ns {
   private:
     std::size_t id_{};
     std::string name_{};
+    std::size_t memory_usage_{};
     std::vector<std::shared_ptr<Value>> inputs_{};
     std::vector<std::shared_ptr<Value>> outputs_{};
   };
