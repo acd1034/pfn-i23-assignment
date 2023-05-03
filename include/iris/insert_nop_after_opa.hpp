@@ -1,5 +1,6 @@
 /// @file insert_nop_after_opa.hpp
 #pragma once
+#include "fundamental.hpp"
 #include "graph.hpp"
 
 namespace ns {

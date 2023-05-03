@@ -1,5 +1,6 @@
 /// @file eliminate_nop.hpp
 #pragma once
+#include "fundamental.hpp"
 #include "graph.hpp"
 
 namespace ns {

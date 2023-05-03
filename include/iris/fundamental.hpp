@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <tuple>

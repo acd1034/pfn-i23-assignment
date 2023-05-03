@@ -1,6 +1,7 @@
 /// @file memory_leak_analyzer.hpp
 #pragma once
 #include <algorithm> // std::transform, std::all_of
+#include "fundamental.hpp"
 #include "graph.hpp"
 
 namespace ns {
