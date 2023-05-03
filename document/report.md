@@ -47,5 +47,25 @@ function relink_source_node(
 ```
 
 ```cpp
-
+Graph eliminate_nop(Graph graph):
+  usize i ← 0
+  while i != graph.nodes.length:
+    std::shared_ptr<Node> node = graph.nodes[i]
+    bool is_nop ← node->name == "NOP" and node->input_values.length == 1 and node->output_values.length == 1
+    if (not is_nop)
+      i ← i + 1
+      continue
+    std::shared_ptr<Value> value ← node->input_values[0]
+    std::shared_ptr<Node> prev_node ← value->source_node
+    // ... -> prev_node -(value)-> node -> next_node -> ...
+    disconnect_nodes(value)
+    // ... -> prev_node
+    //             node -(value2)-> next_node -> ...
+    std::shared_ptr<Value> value2 ← node->output_values[0]
+    relink_source_node(value2, prev_node)
+    // ... -> prev_node -> next_node -> ...
+    //             node
+    graph.nodesのi番目の要素を削除
+    iに削除した要素の次の要素の位置を代入
+    // ... -> prev_node -> next_node -> ...
 ```
