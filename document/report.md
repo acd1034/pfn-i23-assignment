@@ -75,3 +75,29 @@ function connect_nodes(
   to_nodeのinput_valuesの末尾にvalueを追加
   return
 ```
+
+```cpp
+function insert_nop_after_opa(Graph graph) -> Graph:
+  usize i ← 0
+  while i != graph.nodes.length:
+    std::shared_ptr<Node> node = graph.nodes[i]
+    bool is_opa = node->name == "opA" and node->output_values.length == 1
+    if (not is_opa)
+      i ← i + 1
+      continue
+    //        (i)     (i+1)
+    // ... -> node -> next_node -> ...
+    std::shared_ptr<Node> nop ← "NOP"をnameとNodeのstd::shared_ptr
+    graph.nodesのi+1番目の位置にnopを挿入
+    // ... -> node -(value)-> next_node -> ...
+    //         nop
+    std::shared_ptr<Value> value ← node->output_values[0]
+    relink_source_node(value, nop)
+    // ... -> node
+    //         nop -> next_node -> ...
+    connect_nodes(node, nop)
+    //        (i)     (i+1)   (i+2)
+    // ... -> node -> nop  -> next_node -> ...
+    i ← i + 2
+  return graph
+```
