@@ -39,7 +39,7 @@ function relink_source_node(
 ```
 
 ```cpp
-Graph eliminate_nop(Graph graph):
+function eliminate_nop(Graph graph) -> Graph:
   usize i ← 0
   while i != graph.nodes.length:
     std::shared_ptr<Node> node = graph.nodes[i]
@@ -47,9 +47,10 @@ Graph eliminate_nop(Graph graph):
     if (not is_nop)
       i ← i + 1
       continue
+    //        (i-1)                (i)     (i+1)
+    // ... -> prev_node -(value)-> node -> next_node -> ...
     std::shared_ptr<Value> value ← node->input_values[0]
     std::shared_ptr<Node> prev_node ← value->source_node
-    // ... -> prev_node -(value)-> node -> next_node -> ...
     disconnect_nodes(value)
     // ... -> prev_node
     //             node -(value2)-> next_node -> ...
@@ -58,8 +59,9 @@ Graph eliminate_nop(Graph graph):
     // ... -> prev_node -> next_node -> ...
     //             node
     graph.nodesのi番目の要素を削除
-    iに削除した要素の次の要素の位置を代入
+    //        (i-1)        (i)
     // ... -> prev_node -> next_node -> ...
+  return graph
 ```
 
 ## 問 3
