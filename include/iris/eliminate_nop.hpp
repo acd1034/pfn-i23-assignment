@@ -17,29 +17,31 @@ namespace ns {
     }
 
     Graph::insert_point_t run_on_node(Graph::insert_point_t it) {
+      std::shared_ptr<Node> node = *it;
       using namespace std::string_view_literals;
-      bool is_nop = (*it)->name() == "NOP"sv and (*it)->inputs().size() == 1
-                    and (*it)->outputs().size() == 1;
+      bool is_nop = node->name() == "NOP"sv and node->inputs().size() == 1
+                    and node->outputs().size() == 1;
 
       if (not is_nop) {
-        ++it;
-        return it;
+        return std::move(it) + 1;
       }
 
-      std::shared_ptr<Node> nop = *it;
-      [[maybe_unused]] std::weak_ptr<Node> weak_nop = nop;
-      std::shared_ptr<Node> prev_node = nop->inputs()[0]->source();
-
-      // ... -> prev_node -> nop -> next_node -> ...
-      disconnect_nodes(prev_node, nop);
+      // ... -> prev_node -(value)-> nop -> next_node -> ...
+      std::shared_ptr<Node> nop = std::move(node);
+      [[maybe_unused]] long use_count = nop.use_count();
+      std::shared_ptr<Value> value = nop->inputs()[0];
+      std::shared_ptr<Node> prev_node = value->source();
+      disconnect_nodes(std::move(value));
       // ... -> prev_node
-      //              nop -> next_node -> ...
-      relink_source_node(std::move(nop), std::move(prev_node));
+      //              nop -(value2)-> next_node -> ...
+      std::shared_ptr<Value> value2 = nop->outputs()[0];
+      relink_source_node(std::move(value2), std::move(prev_node));
       // ... -> prev_node -> next_node -> ...
       //              nop
       it = graph_.erase_node(std::move(it));
+      // ... -> prev_node -> next_node -> ...
 
-      assert(weak_nop.expired());
+      assert(nop.use_count() == use_count - 1);
       return it;
     }
 

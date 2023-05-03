@@ -61,30 +61,31 @@ namespace ns {
     // from.outputs 追加
     from->append_output(new_value);
     // to.inputs 追加
-    to->append_input(std::move(new_value));
+    to->append_input(new_value);
 
-    assert(to->inputs().back().use_count() == 2);
+    assert(new_value.use_count() == 3);
   }
 
-  void disconnect_nodes(std::shared_ptr<Node> from, std::shared_ptr<Node> to) {
+  void disconnect_nodes(std::shared_ptr<Value> value) {
+    [[maybe_unused]] long use_count = value.use_count();
+    std::shared_ptr<Node> from = value->source();
+    std::shared_ptr<Node> to = value->target();
     assert(from->outputs().size() == 1 and to->inputs().size() == 1);
-    [[maybe_unused]] std::weak_ptr<Value> value = to->inputs()[0];
-    assert(value.use_count() == 2);
 
     // from.outputs[0] 削除
     from->clear_output();
     // to.inputs[0] 削除
     to->clear_input();
 
-    assert(value.expired());
+    assert(value.use_count() == use_count - 2);
   }
 
-  /// from.outputs[0].source を to に変更する
-  void relink_source_node(std::shared_ptr<Node> from,
+  /// value.source を to に変更する
+  void relink_source_node(std::shared_ptr<Value> value,
                           std::shared_ptr<Node> to) {
-    assert(from->outputs().size() == 1);
-    std::shared_ptr<Value> value = from->outputs()[0];
     [[maybe_unused]] long use_count = value.use_count();
+    std::shared_ptr<Node> from = value->source();
+    assert(from->outputs().size() == 1);
 
     // from.outputs[0] 削除
     from->clear_output();
@@ -163,14 +164,14 @@ namespace ns {
                                      std::vector<std::shared_ptr<Node>> args) {
       auto next_node =
         std::make_shared<Node>(graph_.unique_id(), std::move(name));
+      insert_point_ = graph_.insert_node(std::move(insert_point_), next_node);
+      ++insert_point_;
       for (auto&& prev_node : args) {
         // ... -> prev_node
         //        next_node
         connect_nodes(std::move(prev_node), next_node);
         // ... -> prev_node -> next_node
       }
-      insert_point_ = graph_.insert_node(std::move(insert_point_), next_node);
-      ++insert_point_;
       assert(next_node.use_count() == 2);
       return next_node;
     }

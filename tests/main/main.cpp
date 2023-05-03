@@ -189,11 +189,19 @@ TEST_CASE("eliminate_nop", "[eliminate_nop]") {
       auto result2 = ns::GraphGen().gen(std::move(*expr));
       if (auto graph = std::get_if<ns::Graph>(&result2)) {
         std::cout << '\n' << *graph << std::endl;
+        std::weak_ptr<ns::Node> nop = graph->nodes()[1];
+        std::weak_ptr<ns::Value> src = nop.lock()->inputs()[0];
+        std::weak_ptr<ns::Value> tgt = nop.lock()->outputs()[0];
+        CHECK(nop.lock()->name().compare("NOP") == 0);
+
         auto graph_opt = ns::EliminateNop(std::move(*graph)).run();
         std::cout << '\n' << graph_opt << std::endl;
 
         auto stat = ns::MemoryLeakAnalyzer(*graph).run();
         CHECK(stat.pos == graph->nodes().end());
+        CHECK(nop.expired());
+        CHECK(src.expired());
+        CHECK(tgt.use_count() == 2);
 
         CHECK(graph_opt.nodes().size() == 3);
         CHECK(graph_opt.nodes()[0]->name().compare("Const") == 0);
@@ -213,11 +221,17 @@ TEST_CASE("insert_nop_after_opa", "[insert_nop_after_opa]") {
       auto result2 = ns::GraphGen().gen(std::move(*expr));
       if (auto graph = std::get_if<ns::Graph>(&result2)) {
         std::cout << '\n' << *graph << std::endl;
+        std::weak_ptr<ns::Node> opa = graph->nodes()[0];
+        std::weak_ptr<ns::Value> tgt = opa.lock()->outputs()[0];
+        CHECK(opa.lock()->name().compare("opA") == 0);
+
         auto graph_opt = ns::InsertNopAfterOpA(std::move(*graph)).run();
         std::cout << '\n' << graph_opt << std::endl;
 
         auto stat = ns::MemoryLeakAnalyzer(*graph).run();
         CHECK(stat.pos == graph->nodes().end());
+        CHECK(opa.use_count() == 1);
+        CHECK(tgt.use_count() == 2);
 
         CHECK(graph_opt.nodes().size() == 4);
         CHECK(graph_opt.nodes()[0]->name().compare("opA") == 0);
