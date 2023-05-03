@@ -252,6 +252,37 @@ TEST_CASE("insert_nop_after_opa", "[insert_nop_after_opa]") {
     CHECK(graph_opt.nodes()[2]->name().compare("Const") == 0);
     CHECK(graph_opt.nodes()[3]->name().compare("Add") == 0);
   }
+  SECTION("Modified Add(opA(Const()))") {
+    std::string_view in = "Add(opA(Const()))";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    auto expr = std::get_if<ns::Expr>(&result);
+    REQUIRE(expr);
+
+    auto result2 = ns::GraphGen().gen(std::move(*expr));
+    auto graph = std::get_if<ns::Graph>(&result2);
+    REQUIRE(graph);
+    ns::connect_nodes(graph->nodes()[0], graph->nodes()[2]);
+    std::cout << '\n' << *graph << std::endl;
+
+    std::weak_ptr<ns::Node> opa = graph->nodes()[1];
+    std::weak_ptr<ns::Value> tgt = opa.lock()->outputs()[0];
+    CHECK(opa.lock()->name().compare("opA") == 0);
+
+    auto graph_opt = ns::InsertNopAfterOpA(std::move(*graph)).run();
+    std::cout << '\n' << graph_opt << std::endl;
+
+    auto stat = ns::MemoryLeakAnalyzer(*graph).run();
+    CHECK(stat.pos == graph->nodes().end());
+    CHECK(opa.use_count() == 1);
+    CHECK(tgt.use_count() == 2);
+
+    CHECK(graph_opt.nodes().size() == 4);
+    CHECK(graph_opt.nodes()[0]->name().compare("Const") == 0);
+    CHECK(graph_opt.nodes()[1]->name().compare("opA") == 0);
+    CHECK(graph_opt.nodes()[2]->name().compare("NOP") == 0);
+    CHECK(graph_opt.nodes()[3]->name().compare("Add") == 0);
+  }
 }
 
 TEST_CASE("memory_usage_analyzer", "[memory_usage_analyzer]") {
