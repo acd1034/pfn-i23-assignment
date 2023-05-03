@@ -20,19 +20,19 @@ class Graph:
 function disconnect_nodes(value: SharedObject of Value):
   var from_node: SharedObject of Node ← value->source_node
   var to_node: SharedObject of Node ← value->target_node
-  var i: usize ← from_node->output_values内でのvalueの位置
-  var j: usize ← to_node->input_values内でのvalueの位置
-  from_node->output_valuesのi番目の要素を削除
-  to_node->input_valuesのj番目の要素を削除
+  var i: usize ← the index of value in List from_node->output_values
+  var j: usize ← the index of value in List to_node->input_values
+  Remove the i-th element from List from_node->output_values
+  Remove the j-th element from List to_node->input_values
   return
 
-/// value->source_nodeをto_nodeに変更する
+// Change the value->source_node to to_node
 function relink_source_node(
   value: SharedObject of Value, to_node: SharedObject of Node):
   var from_node: SharedObject of Node ← value->source_node
-  var i: usize ← from_nodeのoutput_values内でのvalueの位置
-  from_node->output_valuesのi番目の要素を削除
-  to_node->output_valuesの末尾にvalueを追加
+  var i: usize ← the index of value in List from_node->output_values
+  Remove the i-th element from List from_node->output_values
+  Append value to the end of List to_node->output_values
   value->source_node ← to_node
   return
 ```
@@ -42,7 +42,8 @@ function eliminate_nop(graph: Graph) -> Graph:
   var i: usize ← 0
   while i != graph.nodes.length do
     var node: SharedObject of Node ← graph.nodes[i]
-    var is_nop: bool ← node->name == "NOP" and node->input_values.length == 1 and node->output_values.length == 1
+    var is_nop: bool ← node->name == "NOP" and node->input_values.length == 1
+      and node->output_values.length == 1
     if not is_nop then
       i ← i + 1
       continue
@@ -57,7 +58,7 @@ function eliminate_nop(graph: Graph) -> Graph:
     relink_source_node(value2, prev_node)
     // ... -> prev_node -> next_node -> ...
     //             node
-    graph.nodesのi番目の要素を削除
+    Remove the i-th element from List graph.nodes
     //        (i-1)        (i)
     // ... -> prev_node -> next_node -> ...
   return graph
@@ -68,9 +69,10 @@ function eliminate_nop(graph: Graph) -> Graph:
 ```cpp
 function connect_nodes(
   from_node: SharedObject of Node, to_node: SharedObject of Node):
-  var value: SharedObject of Value ← from_nodeをsource_node,to_nodeをtarget_nodeとするValue
-  from_node->output_valuesの末尾にvalueを追加
-  to_node->input_valuesの末尾にvalueを追加
+  var value: SharedObject of Value
+    ← a Value with source_node from_node and target_node to_node
+  Append value to the end of List from_node->output_values
+  Append value to the end of List to_node->input_values
   return
 ```
 
@@ -85,8 +87,8 @@ function insert_nop_after_opa(graph: Graph) -> Graph:
       continue
     //        (i)     (i+1)
     // ... -> node -> next_node -> ...
-    var nop: SharedObject of Node ← "NOP"をnameとするNode
-    graph.nodesのi+1番目の位置にnopを挿入
+    var nop: SharedObject of Node ← a Node with name "NOP"
+    Insert nop at the (i+1)-th position of List graph.nodes
     // ... -> node -(value)-> next_node -> ...
     //         nop
     var value: SharedObject of Value ← node->output_values[0]
