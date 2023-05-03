@@ -30,8 +30,8 @@ function disconnect_nodes(std::shared_ptr<Value> value):
   std::shared_ptr<Node> to_node ← valueのtarget_nodeのstd::shared_ptr
   usize i ← from_nodeのoutput_values内でのvalueの位置
   usize j ← to_nodeのinput_values内でのvalueの位置
-  from_nodeのi番目の要素を削除
-  to_nodeのj番目の要素を削除
+  from_nodeのoutput_valuesのi番目の要素を削除
+  to_nodeのinput_valuesのj番目の要素を削除
   return
 
 /// valueのsource_nodeをto_nodeに変更する
@@ -40,7 +40,7 @@ function relink_source_node(
   std::shared_ptr<Node> to_node):
   std::shared_ptr<Node> from_node ← valueのsource_nodeのstd::shared_ptr
   usize i ← from_nodeのoutput_values内でのvalueの位置
-  from_nodeのi番目の要素を削除
+  from_nodeのoutput_valuesのi番目の要素を削除
   to_nodeのoutput_valuesの末尾にvalueを追加
   valueのsource_nodeにto_nodeを代入
   return
