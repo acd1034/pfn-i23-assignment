@@ -5,6 +5,7 @@
 #include <iris/insert_nop_after_opa.hpp>
 #include <iris/lex.hpp>
 #include <iris/memory_leak_analyzer.hpp>
+#include <iris/memory_usage_analyzer.hpp>
 #include <iris/parse.hpp>
 
 TEST_CASE("lex", "[lex]") {
@@ -250,5 +251,58 @@ TEST_CASE("insert_nop_after_opa", "[insert_nop_after_opa]") {
     CHECK(graph_opt.nodes()[1]->name().compare("NOP") == 0);
     CHECK(graph_opt.nodes()[2]->name().compare("Const") == 0);
     CHECK(graph_opt.nodes()[3]->name().compare("Add") == 0);
+  }
+}
+
+TEST_CASE("memory_usage_analyzer", "[memory_usage_analyzer]") {
+  SECTION("Op(Op(Op(Op(Op()))))") {
+    std::string_view in = "Op(Op(Op(Op(Op()))))";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    auto expr = std::get_if<ns::Expr>(&result);
+    REQUIRE(expr);
+
+    auto result2 = ns::GraphGen().gen(std::move(*expr));
+    auto graph = std::get_if<ns::Graph>(&result2);
+    REQUIRE(graph);
+    std::cout << '\n' << *graph << std::endl;
+
+    auto stat = ns::MemoryUsageAnalyzer(*graph).run();
+    CHECK(stat.last_uses[0] == 1);
+    CHECK(stat.last_uses[1] == 2);
+    CHECK(stat.last_uses[2] == 3);
+    CHECK(stat.last_uses[3] == 4);
+    CHECK(stat.last_uses[4] == 4);
+    CHECK(stat.usages[0] == 1);
+    CHECK(stat.usages[1] == 2);
+    CHECK(stat.usages[2] == 2);
+    CHECK(stat.usages[3] == 2);
+    CHECK(stat.usages[4] == 2);
+  }
+  SECTION("Modified Op(Op(Op(Op(Op()))))") {
+    std::string_view in = "Op(Op(Op(Op(Op()))))";
+    ns::Lexer it(in);
+    auto result = ns::parse_expr(it);
+    auto expr = std::get_if<ns::Expr>(&result);
+    REQUIRE(expr);
+
+    auto result2 = ns::GraphGen().gen(std::move(*expr));
+    auto graph = std::get_if<ns::Graph>(&result2);
+    REQUIRE(graph);
+    ns::connect_nodes(graph->nodes()[0], graph->nodes()[4]);
+    ns::connect_nodes(graph->nodes()[1], graph->nodes()[3]);
+    std::cout << '\n' << *graph << std::endl;
+
+    auto stat = ns::MemoryUsageAnalyzer(*graph).run();
+    CHECK(stat.last_uses[0] == 4);
+    CHECK(stat.last_uses[1] == 3);
+    CHECK(stat.last_uses[2] == 3);
+    CHECK(stat.last_uses[3] == 4);
+    CHECK(stat.last_uses[4] == 4);
+    CHECK(stat.usages[0] == 1);
+    CHECK(stat.usages[1] == 2);
+    CHECK(stat.usages[2] == 3);
+    CHECK(stat.usages[3] == 4);
+    CHECK(stat.usages[4] == 3);
   }
 }
