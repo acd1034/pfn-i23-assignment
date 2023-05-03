@@ -17,14 +17,6 @@ class Graph:
 ## 問 2
 
 ```cpp
-function connect_nodes(
-  std::shared_ptr<Node> from_node,
-  std::shared_ptr<Node> to_node):
-  std::shared_ptr<Value> value ← from_nodeをsource_node,to_nodeをtarget_nodeとするValueのstd::shared_ptr
-  from_nodeのoutput_valuesの末尾にvalueを追加
-  to_nodeのinput_valuesの末尾にvalueを追加
-  return
-
 function disconnect_nodes(std::shared_ptr<Value> value):
   std::shared_ptr<Node> from_node ← valueのsource_nodeのstd::shared_ptr
   std::shared_ptr<Node> to_node ← valueのtarget_nodeのstd::shared_ptr
@@ -68,4 +60,16 @@ Graph eliminate_nop(Graph graph):
     graph.nodesのi番目の要素を削除
     iに削除した要素の次の要素の位置を代入
     // ... -> prev_node -> next_node -> ...
+```
+
+## 問 3
+
+```cpp
+function connect_nodes(
+  std::shared_ptr<Node> from_node,
+  std::shared_ptr<Node> to_node):
+  std::shared_ptr<Value> value ← from_nodeをsource_node,to_nodeをtarget_nodeとするValueのstd::shared_ptr
+  from_nodeのoutput_valuesの末尾にvalueを追加
+  to_nodeのinput_valuesの末尾にvalueを追加
+  return
 ```
