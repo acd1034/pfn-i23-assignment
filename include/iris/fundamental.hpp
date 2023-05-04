@@ -17,11 +17,12 @@
 #include <vector>
 
 #define NS_RESULT_TRY_IMPL(var, result)                                        \
-  auto&& ns_tmp_##var = (result);                                              \
-  if (ns_tmp_##var.index() == 1)                                               \
-    return std::get<1>(std::forward<decltype(ns_tmp_##var)>(ns_tmp_##var));    \
+  auto&& ns_temporary##var = (result);                                         \
+  if (ns_temporary##var.index() == 1)                                          \
+    return std::get<1>(                                                        \
+      std::forward<decltype(ns_temporary##var)>(ns_temporary##var));           \
   [[maybe_unused]] auto&& var =                                                \
-    std::get<0>(std::forward<decltype(ns_tmp_##var)>(ns_tmp_##var))
+    std::get<0>(std::forward<decltype(ns_temporary##var)>(ns_temporary##var))
 
 #define NS_RESULT_TRY(var, result) NS_RESULT_TRY_IMPL(var, result)
 
