@@ -4,7 +4,7 @@ project(IrisTests
 )
 include(CTest)
 
-# Import the globally installed Iris ifCMake has been started independently in
+# Import the globally installed Iris if CMake has been started independently in
 # this directory with tests
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   find_package(Iris REQUIRED)
@@ -23,7 +23,6 @@ target_compile_options(IrisTestsConfig INTERFACE
   -Wcast-align
   -Wconversion
   -Wctor-dtor-privacy
-  # -Werror
   -Wextra
   -Wpedantic
   -Wshadow
@@ -42,16 +41,6 @@ target_compile_options(IrisTestsConfig INTERFACE
     -Wno-used-but-marked-unused # GTest EXPECT_DEATH
     -Wno-weak-vtables
   >
-  # $<$<CXX_COMPILER_ID:Clang>:
-  #   $<$<AND:$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,4.99>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,6>>:
-  #     $<$<EQUAL:${IRIS_CXX_STANDARD},17>:-Wno-undefined-func-template>
-  #   >
-  # >
-  # $<$<CXX_COMPILER_ID:AppleClang>:
-  #   $<$<AND:$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,9.1>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,10>>:
-  #     $<$<EQUAL:${IRIS_CXX_STANDARD},17>:-Wno-undefined-func-template>
-  #   >
-  # >
   $<$<CXX_COMPILER_ID:GNU>:
     -Wdouble-promotion # float implicit to double
     -Wlogical-op # suspicious uses of logical operators
