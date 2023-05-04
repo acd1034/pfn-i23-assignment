@@ -72,4 +72,5 @@ FetchContent_Declare(Catch2
   GIT_TAG        v3.3.2)
 FetchContent_MakeAvailable(Catch2)
 
+add_subdirectory(graphgen)
 add_subdirectory(main)
