@@ -124,25 +124,20 @@ namespace ns {
     std::size_t count_{};
   };
 
-  template <class CharT, class Traits>
-  void print_node(std::basic_ostream<CharT, Traits>& os,
-                  std::shared_ptr<Node> node) {
+  std::ostream& operator<<(std::ostream& os,
+                           const std::shared_ptr<Node>& node) {
     os << "%" << node->id() << " = " << node->name() << "(";
     const char* dlm = "";
     for (std::shared_ptr<Value> value : node->inputs()) {
-      std::shared_ptr<Node> source = value->source();
-      os << std::exchange(dlm, ", ") << "%" << source->id();
+      os << std::exchange(dlm, ", ") << "%" << value->source()->id();
     }
-    os << ")";
+    return os << ")";
   }
 
-  template <class CharT, class Traits>
-  std::basic_ostream<CharT, Traits>&
-  operator<<(std::basic_ostream<CharT, Traits>& os, const Graph& graph) {
+  std::ostream& operator<<(std::ostream& os, const Graph& graph) {
     const char* dlm = "";
     for (std::shared_ptr<Node> node : graph.nodes()) {
-      os << std::exchange(dlm, "\n");
-      print_node(os, node);
+      os << std::exchange(dlm, "\n") << node;
     }
     return os;
   }
