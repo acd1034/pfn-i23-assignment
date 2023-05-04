@@ -3,6 +3,8 @@
 [![Linux build status](https://github.com/acd1034/computational-graph/actions/workflows/linux-build.yml/badge.svg)](https://github.com/acd1034/computational-graph/actions/workflows/linux-build.yml)
 [![macOS build status](https://github.com/acd1034/computational-graph/actions/workflows/macos-build.yml/badge.svg)](https://github.com/acd1034/computational-graph/actions/workflows/macos-build.yml)
 
+The source code used for verification is attached in the computational-graph directory. The contents of the directory are as follows.
+
 ## Contents
 
 ```
@@ -25,15 +27,15 @@
 
 The correspondence between the files and the questions is as follows:
 
-- [include/iris/graph.hpp](include/iris/graph.hpp):
+- [**include/iris/graph.hpp**](include/iris/graph.hpp):
   Q1. (Implement Node, Value, and Graph)
-- [include/iris/eliminate_nop.hpp](include/iris/eliminate_nop.hpp):
+- [**include/iris/eliminate_nop.hpp**](include/iris/eliminate_nop.hpp):
   Q2. (Remove Node "NOP")
-- [include/iris/insert_nop_after_opa.hpp](include/iris/insert_nop_after_opa.hpp):
+- [**include/iris/insert_nop_after_opa.hpp**](include/iris/insert_nop_after_opa.hpp):
   Q3. (Add Node "NOP" after the output of Node "opA")
-- [include/iris/memory_usage_analyzer.hpp](include/iris/memory_usage_analyzer.hpp):
+- [**include/iris/memory_usage_analyzer.hpp**](include/iris/memory_usage_analyzer.hpp):
   Q4. (Estimate memory consumption)
-- [tests/main/main.cpp](tests/main/main.cpp):
+- [**tests/main/main.cpp**](tests/main/main.cpp):
   Tests for these implementations
 
 ## How to Run Tests
