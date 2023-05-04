@@ -21,8 +21,11 @@ namespace ns {
   inline constexpr auto isspace = [](char c) -> bool {
     return std::isspace(static_cast<unsigned char>(c));
   };
-  inline constexpr auto isalpha = [](char c) -> bool {
-    return std::isalpha(static_cast<unsigned char>(c));
+  inline constexpr auto isident0 = [](char c) -> bool {
+    return std::isalpha(static_cast<unsigned char>(c)) or c == '_';
+  };
+  inline constexpr auto isident1 = [](char c) -> bool {
+    return std::isalnum(static_cast<unsigned char>(c)) or c == '_';
   };
   inline constexpr auto ispunct = [](char c) -> bool {
     return std::ispunct(static_cast<unsigned char>(c));
@@ -33,20 +36,20 @@ namespace ns {
       return {Token(Eof{}), input};
     }
 
-    if (isspace(input.front())) {
+    if (isspace(input[0])) {
       auto it = std::find_if_not(input.begin(), input.end(), isspace);
       auto pos = static_cast<std::size_t>(it - input.begin());
       return lex(input.substr(pos));
     }
 
-    if (isalpha(input.front())) {
-      auto it = std::find_if_not(input.begin(), input.end(), isalpha);
+    if (isident0(input[0])) {
+      auto it = std::find_if_not(input.begin(), input.end(), isident1);
       auto pos = static_cast<std::size_t>(it - input.begin());
       std::string data(input.substr(0, pos));
       return {Token(Ident{std::move(data)}), input.substr(pos)};
     }
 
-    if (ispunct(input.front())) {
+    if (ispunct(input[0])) {
       return {Token(Punct{input.substr(0, 1)}), input.substr(1)};
     }
 

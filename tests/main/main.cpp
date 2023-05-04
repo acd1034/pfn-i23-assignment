@@ -28,11 +28,11 @@ TEST_CASE("lex", "[lex]") {
     CHECK(out.compare("") == 0);
   }
   {
-    std::string_view in = "ident";
+    std::string_view in = "ident_0";
     auto [token, out] = ns::lex(in);
     auto ident = std::get_if<ns::Ident>(&token);
     CHECK(ident);
-    CHECK(ident->data.compare("ident") == 0);
+    CHECK(ident->data.compare("ident_0") == 0);
     CHECK(out.compare("") == 0);
   }
   {
