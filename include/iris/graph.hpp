@@ -1,10 +1,28 @@
 /// @file graph.hpp
 #pragma once
+#include <algorithm> // std::find_if
 #include <iosfwd>
 #include "fundamental.hpp"
 
 namespace ns {
-  class Value;
+  class Node;
+
+  class Value {
+  public:
+    Value() = default;
+    Value(std::shared_ptr<Node> source, std::shared_ptr<Node> target)
+      : source_(std::move(source)), target_(std::move(target)) {}
+
+    std::shared_ptr<Node> source() const { return source_.lock(); }
+    std::shared_ptr<Node> target() const { return target_.lock(); }
+
+    void set_source(std::shared_ptr<Node> node) { source_ = std::move(node); }
+    void set_target(std::shared_ptr<Node> node) { target_ = std::move(node); }
+
+  private:
+    std::weak_ptr<Node> source_{};
+    std::weak_ptr<Node> target_{};
+  };
 
   class Node {
   public:
@@ -30,8 +48,22 @@ namespace ns {
       outputs_.push_back(std::move(value));
     }
 
-    void clear_input() { inputs_.clear(); }
-    void clear_output() { outputs_.clear(); }
+    void erase_input(const std::shared_ptr<Value>& value) {
+      auto pred = [&value](const std::shared_ptr<Value>& input) {
+        return input->source()->id() == value->source()->id();
+      };
+      auto it = std::find_if(inputs_.begin(), inputs_.end(), std::move(pred));
+      assert(it != inputs_.end());
+      inputs_.erase(std::move(it));
+    }
+    void erase_output(const std::shared_ptr<Value>& value) {
+      auto pred = [&value](const std::shared_ptr<Value>& output) {
+        return output->target()->id() == value->target()->id();
+      };
+      auto it = std::find_if(outputs_.begin(), outputs_.end(), std::move(pred));
+      assert(it != outputs_.end());
+      outputs_.erase(std::move(it));
+    }
 
   private:
     std::size_t id_{};
@@ -39,23 +71,6 @@ namespace ns {
     std::size_t memory_usage_{};
     std::vector<std::shared_ptr<Value>> inputs_{};
     std::vector<std::shared_ptr<Value>> outputs_{};
-  };
-
-  class Value {
-  public:
-    Value() = default;
-    Value(std::shared_ptr<Node> source, std::shared_ptr<Node> target)
-      : source_(std::move(source)), target_(std::move(target)) {}
-
-    std::shared_ptr<Node> source() const { return source_.lock(); }
-    std::shared_ptr<Node> target() const { return target_.lock(); }
-
-    void set_source(std::shared_ptr<Node> node) { source_ = std::move(node); }
-    void set_target(std::shared_ptr<Node> node) { target_ = std::move(node); }
-
-  private:
-    std::weak_ptr<Node> source_{};
-    std::weak_ptr<Node> target_{};
   };
 
   void connect_nodes(std::shared_ptr<Node> from, std::shared_ptr<Node> to) {
@@ -73,12 +88,11 @@ namespace ns {
     [[maybe_unused]] long use_count = value.use_count();
     std::shared_ptr<Node> from = value->source();
     std::shared_ptr<Node> to = value->target();
-    assert(from->outputs().size() == 1 and to->inputs().size() == 1);
 
-    // from.outputs[0] 削除
-    from->clear_output();
-    // to.inputs[0] 削除
-    to->clear_input();
+    // from.outputs から value 削除
+    from->erase_output(value);
+    // to.inputs から value 削除
+    to->erase_input(value);
 
     assert(value.use_count() == use_count - 2);
   }
@@ -88,10 +102,9 @@ namespace ns {
                           std::shared_ptr<Node> to) {
     [[maybe_unused]] long use_count = value.use_count();
     std::shared_ptr<Node> from = value->source();
-    assert(from->outputs().size() == 1);
 
-    // from.outputs[0] 削除
-    from->clear_output();
+    // from.outputs から value 削除
+    from->erase_output(value);
     // to.outputs 追加
     to->append_output(value);
     // value.source 更新
