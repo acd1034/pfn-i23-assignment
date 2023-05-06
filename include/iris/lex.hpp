@@ -2,7 +2,7 @@
 #pragma once
 #include <algorithm> // std::find_if_not
 #include <cctype>
-#include "fundamental.hpp" // Error
+#include "fundamental.hpp"
 
 namespace ns {
   struct Ident {
@@ -16,7 +16,11 @@ namespace ns {
   struct Eof {
     friend bool operator==(const Eof&, const Eof&) = default;
   };
-  using Token = std::variant<Ident, Punct, Eof, Error>;
+  struct Invalid {
+    std::string_view data;
+    friend bool operator==(const Invalid&, const Invalid&) = default;
+  };
+  using Token = std::variant<Ident, Punct, Eof, Invalid>;
 
   inline constexpr auto isspace = [](char c) -> bool {
     return std::isspace(static_cast<unsigned char>(c));
@@ -53,8 +57,7 @@ namespace ns {
       return {Token(Punct{input.substr(0, 1)}), input.substr(1)};
     }
 
-    using namespace std::string_view_literals;
-    return {Token(Error{"unexpected character"sv}), input};
+    return {Token(Invalid{input.substr(0, 1)}), input.substr(1)};
   }
 
   struct Lexer {

@@ -9,8 +9,10 @@ TEST_CASE("lex", "[lex]") {
   {
     std::string_view in = "\1";
     auto [token, out] = ns::lex(in);
-    CHECK(std::get_if<ns::Error>(&token));
-    CHECK(out.compare("\1") == 0);
+    auto invalid = std::get_if<ns::Invalid>(&token);
+    CHECK(invalid);
+    CHECK(invalid->data.compare("\1") == 0);
+    CHECK(out.compare("") == 0);
   }
   {
     std::string_view in = "";
