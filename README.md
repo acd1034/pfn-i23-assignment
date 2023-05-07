@@ -38,12 +38,20 @@ The correspondence between the files and the questions is as follows:
 - [**tests/main/main.cpp**](tests/main/main.cpp):
   Tests for these implementations
 
+## Supported Compilers
+
+| Compiler    | Versions        |
+| ----------- | --------------- |
+| GCC         | 11.0.0 or later |
+| Clang       | 13.0.0 or later |
+| Apple Clang | 13.0.0 or later |
+
 ## How to Run Tests
 
 ```sh
-$ cmake -S . -B build
-$ cmake --build build
-$ ctest --test-dir build
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build
 ```
 
 Catch2 testing framework is used for testing. Catch2 is automatically fetched by CMake.
