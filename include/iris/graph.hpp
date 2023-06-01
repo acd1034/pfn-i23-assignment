@@ -74,11 +74,8 @@ namespace ns {
   };
 
   void connect_nodes(std::shared_ptr<Node> from, std::shared_ptr<Node> to) {
-    // new_value.source, new_value.target 確定
     auto new_value = std::make_shared<Value>(from, to);
-    // from.outputs 追加
     from->append_output(new_value);
-    // to.inputs 追加
     to->append_input(new_value);
 
     assert(new_value.use_count() == 3);
@@ -89,9 +86,7 @@ namespace ns {
     std::shared_ptr<Node> from = value->source();
     std::shared_ptr<Node> to = value->target();
 
-    // from.outputs から value 削除
     from->erase_output(value);
-    // to.inputs から value 削除
     to->erase_input(value);
 
     assert(value.use_count() == use_count - 2);
@@ -103,11 +98,8 @@ namespace ns {
     [[maybe_unused]] long use_count = value.use_count();
     std::shared_ptr<Node> from = value->source();
 
-    // from.outputs から value 削除
     from->erase_output(value);
-    // to.outputs 追加
     to->append_output(value);
-    // value.source 更新
     value->set_source(to);
 
     assert(value.use_count() == use_count);
