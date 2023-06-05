@@ -11,13 +11,21 @@ namespace ns {
   public:
     Value() = default;
     Value(std::shared_ptr<Node> source, std::shared_ptr<Node> target)
-      : source_(std::move(source)), target_(std::move(target)) {}
+        : source_(std::move(source)), target_(std::move(target)) {}
 
-    std::shared_ptr<Node> source() const { return source_.lock(); }
-    std::shared_ptr<Node> target() const { return target_.lock(); }
+    std::shared_ptr<Node> source() const {
+      return source_.lock();
+    }
+    std::shared_ptr<Node> target() const {
+      return target_.lock();
+    }
 
-    void set_source(std::shared_ptr<Node> node) { source_ = std::move(node); }
-    void set_target(std::shared_ptr<Node> node) { target_ = std::move(node); }
+    void set_source(std::shared_ptr<Node> node) {
+      source_ = std::move(node);
+    }
+    void set_target(std::shared_ptr<Node> node) {
+      target_ = std::move(node);
+    }
 
   private:
     std::weak_ptr<Node> source_{};
@@ -28,12 +36,19 @@ namespace ns {
   public:
     Node() = default;
     Node(std::size_t id, std::string name, std::size_t memory_usage = 1)
-      : id_(std::move(id)), name_(std::move(name)),
-        memory_usage_(memory_usage) {}
+        : id_(std::move(id)),
+          name_(std::move(name)),
+          memory_usage_(memory_usage) {}
 
-    std::size_t id() const { return id_; }
-    std::string_view name() const { return name_; }
-    std::size_t memory_usage() const { return memory_usage_; }
+    std::size_t id() const {
+      return id_;
+    }
+    std::string_view name() const {
+      return name_;
+    }
+    std::size_t memory_usage() const {
+      return memory_usage_;
+    }
     const std::vector<std::shared_ptr<Value>>& inputs() const {
       return inputs_;
     }
@@ -93,8 +108,9 @@ namespace ns {
   }
 
   /// value.source を to に変更する
-  void relink_source_node(std::shared_ptr<Value> value,
-                          std::shared_ptr<Node> to) {
+  void relink_source_node(
+      std::shared_ptr<Value> value,
+      std::shared_ptr<Node> to) {
     [[maybe_unused]] long use_count = value.use_count();
     std::shared_ptr<Node> from = value->source();
 
@@ -111,9 +127,13 @@ namespace ns {
 
     Graph() = default;
 
-    const std::vector<std::shared_ptr<Node>>& nodes() const { return nodes_; }
+    const std::vector<std::shared_ptr<Node>>& nodes() const {
+      return nodes_;
+    }
 
-    std::size_t unique_id() { return count_++; }
+    std::size_t unique_id() {
+      return count_++;
+    }
 
     node_iterator insert_node(node_iterator pos, std::shared_ptr<Node> node) {
       return nodes_.insert(pos, std::move(node));
@@ -129,8 +149,9 @@ namespace ns {
     std::size_t count_{};
   };
 
-  std::ostream& operator<<(std::ostream& os,
-                           const std::shared_ptr<Node>& node) {
+  std::ostream& operator<<(
+      std::ostream& os,
+      const std::shared_ptr<Node>& node) {
     os << "%" << node->id() << " = " << node->name() << "(";
     const char* dlm = "";
     for (std::shared_ptr<Value> value : node->inputs()) {
@@ -155,18 +176,27 @@ namespace ns {
   public:
     GraphBuilder() = default;
     explicit GraphBuilder(Graph graph)
-      : graph_(std::move(graph)), insert_point_(graph_.nodes().end()) {}
+        : graph_(std::move(graph)), insert_point_(graph_.nodes().end()) {}
 
-    const Graph& graph() const& { return graph_; }
-    Graph graph() && { return std::move(graph_); }
-    Graph::node_iterator insert_point() const { return insert_point_; }
+    const Graph& graph() const& {
+      return graph_;
+    }
+    Graph graph() && {
+      return std::move(graph_);
+    }
+    Graph::node_iterator insert_point() const {
+      return insert_point_;
+    }
 
-    void set_insert_point(Graph::node_iterator pos) { insert_point_ = pos; }
+    void set_insert_point(Graph::node_iterator pos) {
+      insert_point_ = pos;
+    }
 
-    std::shared_ptr<Node> build_node(std::string name,
-                                     std::vector<std::shared_ptr<Node>> args) {
+    std::shared_ptr<Node> build_node(
+        std::string name,
+        std::vector<std::shared_ptr<Node>> args) {
       auto next_node =
-        std::make_shared<Node>(graph_.unique_id(), std::move(name));
+          std::make_shared<Node>(graph_.unique_id(), std::move(name));
       insert_point_ = graph_.insert_node(std::move(insert_point_), next_node);
       ++insert_point_;
       for (auto&& prev_node : args) {

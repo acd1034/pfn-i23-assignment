@@ -13,8 +13,10 @@ namespace ns {
 
   struct MemoryUsageAnalyzer {
     explicit MemoryUsageAnalyzer(const Graph& graph)
-      : graph_(graph), stat_{std::vector<std::size_t>(graph_.nodes().size()),
-                             std::vector<std::size_t>(graph_.nodes().size())} {}
+        : graph_(graph),
+          stat_{
+              std::vector<std::size_t>(graph_.nodes().size()),
+              std::vector<std::size_t>(graph_.nodes().size())} {}
     MemoryUsageAnalyzer(Graph&& graph) = delete;
 
     MemoryUsageStatistics run() && {

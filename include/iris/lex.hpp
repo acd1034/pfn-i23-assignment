@@ -78,7 +78,9 @@ namespace ns {
       token_ = std::move(token);
     }
 
-    value_type operator*() const { return token_; }
+    value_type operator*() const {
+      return token_;
+    }
 
     Lexer& operator++() {
       auto [token, output] = lex(input_);

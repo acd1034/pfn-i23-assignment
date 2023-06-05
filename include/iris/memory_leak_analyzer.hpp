@@ -29,21 +29,26 @@ namespace ns {
       long node_use_count = it->use_count();
       std::vector<long> outputs_use_count((*it)->outputs().size());
       std::transform(
-        (*it)->outputs().begin(), (*it)->outputs().end(),
-        outputs_use_count.begin(),
-        [](const std::shared_ptr<Value>& value) { return value.use_count(); });
-      bool valid =
-        node_use_count == 1
-        and std::all_of(outputs_use_count.begin(), outputs_use_count.end(),
-                        [](long use_count) { return use_count == 2; });
+          (*it)->outputs().begin(),
+          (*it)->outputs().end(),
+          outputs_use_count.begin(),
+          [](const std::shared_ptr<Value>& value) {
+            return value.use_count();
+          });
+      bool valid = node_use_count == 1 and
+          std::all_of(outputs_use_count.begin(),
+                      outputs_use_count.end(),
+                      [](long use_count) { return use_count == 2; });
 
       if (valid) {
         ++it;
         return it;
       }
 
-      stat_ = MemoryLeakStatistics{std::move(it), std::move(node_use_count),
-                                   std::move(outputs_use_count)};
+      stat_ = MemoryLeakStatistics{
+          std::move(it),
+          std::move(node_use_count),
+          std::move(outputs_use_count)};
       it = graph_.nodes().end();
       return it;
     }

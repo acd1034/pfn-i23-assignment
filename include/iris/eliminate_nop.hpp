@@ -19,8 +19,8 @@ namespace ns {
     Graph::node_iterator run_on_node(Graph::node_iterator it) {
       std::shared_ptr<Node> node = *it;
       using namespace std::string_view_literals;
-      bool is_nop = node->name() == "NOP"sv and node->inputs().size() == 1
-                    and node->outputs().size() == 1;
+      bool is_nop = node->name() == "NOP"sv and node->inputs().size() == 1 and
+          node->outputs().size() == 1;
 
       if (not is_nop) {
         return std::move(it) + 1;
